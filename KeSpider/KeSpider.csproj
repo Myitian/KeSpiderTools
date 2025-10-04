@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <Configurations>Debug;ReleaseAOT;ReleaseR2R</Configurations>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UTF.Unknown" Version="*" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseAOT'">
+    <Optimize>True</Optimize>
+    <PublishAot>True</PublishAot>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='ReleaseR2R'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+</Project>
