@@ -131,14 +131,15 @@ partial class Program
 
         static XmlNode CreateFileNode(ReadOnlySpan<char> id, ReadOnlySpan<char> key, string directory, string url, string? path = null)
         {
+            path ??= "";
             return new XmlNode("Fichero")
                 .AppendAttribute(v2)
                 .AppendChild(new XmlNode("FileID").SetValue(EncryptString(id)))
                 .AppendChild(new XmlNode("FileKey").SetValue(EncryptString(key)))
                 .AppendChild(new XmlNode("URL").SetValue(EncryptString(url)))
                 .AppendChild(new XmlNode("NombreFichero").SetValue(url))
-                .AppendChild(new XmlNode("RutaLocal").SetValue(directory))
-                .AppendChild(new XmlNode("RutaRelativa").SetValue(path ?? ""));
+                .AppendChild(new XmlNode("RutaLocal").SetValue(Path.Combine(directory, path)))
+                .AppendChild(new XmlNode("RutaRelativa").SetValue(path));
         }
     }
     public static string EncryptString(ReadOnlySpan<char> data)

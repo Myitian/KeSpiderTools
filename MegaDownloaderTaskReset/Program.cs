@@ -45,19 +45,21 @@ class Program
                     case "?":
                     case "h":
                     case "help":
-                        Console.WriteLine("帮助：");
-                        Console.WriteLine(" 命令    | 参数     | 别名             | 说明");
-                        Console.WriteLine(" quit      无         q, exit            退出");
-                        Console.WriteLine(" help      无         ?, h               帮助");
-                        Console.WriteLine(" version   无         v, ver             版本");
-                        Console.WriteLine(" info      无         i, information     基本信息");
-                        Console.WriteLine(" list      无         l                  文件列表");
-                        Console.WriteLine(" reload    无         r                  重新加载");
-                        Console.WriteLine(" fix       无         fx                 修复不完整的文件夹结构");
-                        Console.WriteLine(" save      无         s                  保存");
-                        Console.WriteLine(" save-as   文件路径   sa, saveas         另存为");
-                        Console.WriteLine(" find      查询内容   f, query, search   查询");
-                        Console.WriteLine(" reset     无         rst                重置下载状态");
+                        Console.WriteLine("""
+                            帮助：
+                            命令    | 参数     | 别名             | 说明
+                            quit      无         q, exit            退出
+                            help      无         ?, h               帮助
+                            version   无         v, ver             版本
+                            info      无         i, information     基本信息
+                            list      无         l                  文件列表
+                            reload    无         r                  重新加载
+                            mkdir     无                            补全目录结构
+                            save      无         s                  保存
+                            save-as   文件路径   sa, saveas         另存为
+                            find      查询内容   f, query, search   查询
+                            reset     无         rst                重置下载状态
+                            """);
                         break;
                     case "v":
                     case "ver":
@@ -114,9 +116,8 @@ class Program
                         xml = ReadXML(xmlPath);
                         Console.WriteLine("重新加载成功！");
                         break;
-                    case "fx":
-                    case "fix":
-                        Console.WriteLine("开始修复目录结构……");
+                    case "mkdir":
+                        Console.WriteLine("开始补全目录结构……");
                         HashSet<string> dirs = [];
                         foreach (XmlNode package in xml.ChildNodes)
                         {
@@ -124,20 +125,17 @@ class Program
                                 continue;
                             foreach (XmlNode file in files.ChildNodes)
                             {
-                                if (file["RutaLocal"] is not XmlNode localPath
+                                if (file["RutaLocal"] is not { Value: string localPath }
                                     || file["EstadoDescarga"] is { Value: "Completado" })
                                     continue;
-                                string path = Path.Combine(localPath.Value, file["RutaRelativa"]?.Value ?? "");
-                                if (Directory.Exists(path))
-                                    dirs.Add(path);
-                                else if (dirs.Add(path))
+                                if (dirs.Add(localPath) && !Directory.Exists(localPath))
                                 {
-                                    Console.WriteLine($"创建文件夹 \"{path}\"");
-                                    Directory.CreateDirectory(path);
+                                    Console.WriteLine($"创建文件夹 \"{localPath}\"");
+                                    Directory.CreateDirectory(localPath);
                                 }
                             }
                         }
-                        Console.WriteLine("修复目录结构完成！");
+                        Console.WriteLine("补全目录结构完成！");
                         break;
                     case "s":
                     case "save":
@@ -235,13 +233,13 @@ class Program
                                     switch (mode)
                                     {
                                         case 3 when file["RutaLocal"] is XmlNode localPath:
-                                            string filePath1 = Path.Combine(localPath.Value, relativePath.Value, fileName.Value);
+                                            string filePath1 = Path.Combine(localPath.Value, fileName.Value);
                                             Console.WriteLine($"  * 删除\"{filePath1}\"");
                                             if (File.Exists(filePath1))
                                                 File.Delete(filePath1);
                                             goto case 1;
                                         case 2 when file["RutaLocal"] is XmlNode localPath:
-                                            string filePath2 = Path.Combine(localPath.Value, relativePath.Value, fileName.Value);
+                                            string filePath2 = Path.Combine(localPath.Value, fileName.Value);
                                             Console.WriteLine($"  * 将\"{filePath2}\"移动到回收站");
                                             if (File.Exists(filePath2))
                                                 FileSystem.DeleteFile(filePath2, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
