@@ -8,6 +8,11 @@ public static class Utils
 {
     readonly static FrozenSet<char> InvalidFileNameChars = Path.GetInvalidFileNameChars().ToFrozenSet();
 
+    public static void MakeLink(string fileName, string existingFileName)
+    {
+        if (!HardLink.Create(fileName, existingFileName))
+            File.CreateSymbolicLink(fileName, existingFileName);
+    }
     public static DateTime NormalizeTime(DateTime time)
     {
         if (time.Kind is not DateTimeKind.Unspecified)
@@ -66,7 +71,6 @@ public static class Utils
             fsi.LastWriteTime = editTimeNotNull;
         }
     }
-
     public static ReadOnlySpan<char> XTrim(ReadOnlySpan<char> text)
     {
         int i = 0, j = text.Length - 1;
@@ -88,6 +92,5 @@ public static class Utils
         }
         return text[i..(j + 1)];
     }
-
     public static IEnumerable<T> AsEnumerable<T>(params IEnumerable<T> values) => values;
 }

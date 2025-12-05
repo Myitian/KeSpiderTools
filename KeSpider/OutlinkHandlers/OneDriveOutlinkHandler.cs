@@ -102,8 +102,8 @@ public partial class OneDriveOutlinkHandler : IOutlinkHandler, IDisposable
                     {
                         if (File.Exists(path))
                             File.Delete(path);
-                        Console.WriteLine("    @O - SymbolicLink");
-                        File.CreateSymbolicLink(path, duplicated);
+                        Console.WriteLine("    @O - Link");
+                        Utils.MakeLink(path, duplicated);
                         goto E;
                     }
                     else if (File.Exists(path))

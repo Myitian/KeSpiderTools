@@ -119,7 +119,7 @@ class Program
         ProcessStartInfo _7z = new(_7zFile, [
             "x",
             $"-o{folder}",
-            .. (password is not null ? Utils.AsEnumerable<string>($"-p{password}") : []),
+            .. password is not null ? [$"-p{password}"] : Enumerable.Empty<string>(),
             path]);
         Process.Start(_7z)?.WaitForExit();
     }
@@ -499,8 +499,8 @@ class Program
                 {
                     if (File.Exists(path))
                         File.Delete(path);
-                    Console.WriteLine("    @F - SymbolicLink");
-                    File.CreateSymbolicLink(path, duplicated);
+                    Console.WriteLine("    @F - Link");
+                    Utils.MakeLink(path, duplicated);
                     goto E;
                 }
                 else if (File.Exists(path))
@@ -676,8 +676,8 @@ class Program
                 {
                     if (File.Exists(path))
                         File.Delete(path);
-                    Console.WriteLine("    @P - SymbolicLink");
-                    File.CreateSymbolicLink(path, duplicated);
+                    Console.WriteLine("    @P - Link");
+                    Utils.MakeLink(path, duplicated);
                     goto E;
                 }
                 else if (File.Exists(path))
