@@ -88,13 +88,14 @@ class Program
             bool waiting_checkpoint = !resume_checkpoint.IsEmpty;
             using FileStream fs = File.Open(output, FileMode.Create, FileAccess.Write, FileShare.Read);
             using StreamWriter sw = new(fs, Encoding.UTF8);
+            HashSet<string>? visited = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? [] : null;
             foreach (string file in argx.UnknownArgs
-                .Select(Path.GetFullPath)
-                .SelectMany(it => File.Exists(it) ? [it]
-                                : Directory.Exists(it) ? EnumerateAllFilesDefaultOrder(it)
-                                : [])
-                .Distinct()
-                .Where(it => path_filter?.IsMatch(it) is not false))
+            .SelectMany(it => File.Exists(it) ? [it]
+                            : Directory.Exists(it) ? EnumerateAllFilesDefaultOrder(it)
+                            : [])
+            .Select(Path.GetFullPath)
+            .Distinct()
+            .Where(it => path_filter?.IsMatch(it) is not false))
             {
                 if (waiting_checkpoint)
                 {
@@ -104,6 +105,23 @@ class Program
                 }
                 Console.ResetColor();
                 Console.Error.WriteLine(file);
+                if (visited is not null)
+                {
+                    try
+                    {
+                        if (!visited.Add(file))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.Error.WriteLine("Skipping visited");
+                            continue;
+                        }
+                        int colon = file.IndexOf(':');
+                        ReadOnlySpan<char> drive = colon < 0 ? [] : file.AsSpan(0, colon + 1);
+                        foreach (ReadOnlyMemory<char> link in new HardLinkTargetEnumerator(file))
+                            visited.Add(string.Concat(drive, link.Span));
+                    }
+                    catch { }
+                }
                 if (dry)
                 {
                     sw.WriteLine(file);
@@ -127,6 +145,7 @@ class Program
                     }
                 }
             }
+            Console.ResetColor();
             return 0;
         }
         catch (Exception ex)
