@@ -11,7 +11,7 @@ partial class Program
 {
     static readonly KeyValuePair<string, string> v2 = new("v", "2");
 
-    [GeneratedRegex(@"https?://mega(?:\.co)?\.nz/[^""'<>\s]+#[a-zA-Z0-9\-_]+")]
+    [GeneratedRegex(@"https?://mega(?:\.co)?\.nz/[^#]+#[a-zA-Z0-9\-_]+")]
     private static partial Regex RegMega();
     private static async Task<int> Main(string[] args)
     {
