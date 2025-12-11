@@ -89,7 +89,8 @@ class Program
             using FileStream fs = File.Open(output, FileMode.Create, FileAccess.Write, FileShare.Read);
             using StreamWriter sw = new(fs, Encoding.UTF8);
             foreach (string file in argx.UnknownArgs
-                .SelectMany(it => File.Exists(it) ? [Path.GetFullPath(it)]
+                .Select(Path.GetFullPath)
+                .SelectMany(it => File.Exists(it) ? [it]
                                 : Directory.Exists(it) ? EnumerateAllFilesDefaultOrder(it)
                                 : [])
                 .Distinct()

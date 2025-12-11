@@ -27,7 +27,7 @@ public sealed class XmlNode(string name)
     }
     public XmlNode GetChildOrAddNew(string name)
     {
-        if(_map.TryGetValue(name, out XmlNode? node))
+        if (_map.TryGetValue(name, out XmlNode? node))
             return node;
         node = new(name);
         AppendChild(node);

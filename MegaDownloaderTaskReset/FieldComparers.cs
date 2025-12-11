@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace MegaDownloaderTaskReset;
+﻿namespace MegaDownloaderTaskReset;
 
 static class FieldComparers
 {

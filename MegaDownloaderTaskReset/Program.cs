@@ -1,9 +1,6 @@
 ﻿using Microsoft.VisualBasic.FileIO;
-using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -44,10 +41,10 @@ static class Program
                  version   : 无       : v, ver           : 版本
                  dedup     : 检测方式 : dd               : 尝试文件去重
                  find      : 查询内容 : f, query, search : 查询
+                 fix       : 无       : fx               : 修复目录和下载状态
                  info      : 无       : i, information   : 基本信息
                  list      : 无       : l                : 文件列表
                  reload    : 无       : r                : 重新加载
-                 mkdir     : 无       :                  : 补全目录结构
                  priority  : 无       : p                : 按照当前顺序重新设置优先级
                  reset     : 无       : rst              : 重置下载状态
                  save      : 无       : s                : 保存
@@ -374,7 +371,7 @@ static class Program
         }, "find", "f", "query", "search");
         RegisterCommand(static (ref updateNotSave, ref xml, args) =>
         {
-            Console.WriteLine("开始修复目录结构……");
+            Console.WriteLine("开始修复……");
             HashSet<string> dirs = [];
             foreach (XmlNode package in xml.ChildNodes)
             {
@@ -390,8 +387,16 @@ static class Program
                         updateNotSave = true;
                         localPath.SetValue(trimmed.ToString());
                     }
-                    if (file["EstadoDescarga"] is { Value: "Completado" })
+                    if (file["EstadoDescarga"] is { Value: "Completado" } state)
+                    {
+                        if (file["Porcentaje"]?.Value != "100"
+                            || file["TamanoBytes"]?.Value != file["BytesDescargados"]?.Value)
+                        {
+                            updateNotSave = true;
+                            state.SetValue("EnCola");
+                        }
                         continue;
+                    }
                     if (dirs.Add(localPath.Value) && !Directory.Exists(localPath.Value))
                     {
                         WriteLine(Console.Out,
@@ -400,9 +405,9 @@ static class Program
                     }
                 }
             }
-            Console.WriteLine("修复目录结构完成！");
+            Console.WriteLine("修复完成！");
             return false;
-        }, "fix-dir", "fd");
+        }, "fix", "fx");
         RegisterCommand(static (ref updateNotSave, ref xml, args) =>
         {
             Console.WriteLine("基本信息：");
